@@ -26,14 +26,14 @@ else
 CFLAGS += $(OPTS) -fopenmp # <- slight perf gain
 endif
 
-default: libSENR.a
+default: libBHaH.a
 
-libSENR.a: senr_lib.o 
-	$(AR)  r libSENR.a senr_lib.o 
-	$(RANLIB) libSENR.a
+libBHaH.a: bhah_lib.o
+	$(AR)  r libBHaH.a bhah_lib.o
+	$(RANLIB) libBHaH.a
 
-senr_lib.o: $(BSSN_DIR)/senr_lib.c
-	$(CC) -c $(CFLAGS) $(INCLUDE_DIRS) $(DEFINES) $(BSSN_DIR)/senr_lib.c
+bhah_lib.o: $(BSSN_DIR)/bhah_lib.c
+	$(CC) -c $(CFLAGS) $(INCLUDE_DIRS) $(DEFINES) $(BSSN_DIR)/bhah_lib.c
 
 clean:
-	rm -f senr_lib_main libSENR.a senr_lib.o senr_lib_main.o
+	rm -f bhah_lib_main libBHaH.a bhah_lib.o bhah_lib_main.o
