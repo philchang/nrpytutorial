@@ -21,9 +21,7 @@
  * 
  * void BHaH_set_Tmunu(const int rgrid, const REAL rmax, REAL *in_Tmunu, BHaH_struct *bhahstruct);
  * 
- *     NOTE: In the void SENR_set_Tmunu() version of this function, it calls another funciton called
- *           void set_Tmunu_at_rbar(), which computes an angular average of Tmunu. 
- *           In the new version, we will no longer compute the average.
+ *     NOTE: This function is no longer used and will not be included in the new library.
  * 
  * BHaH_output_file(char *filename, BHaH_struct *bhahstruct, int dim);
  * 
@@ -163,70 +161,6 @@ void BHaH_get_metric_extrinsic_curvature(BHaH_struct *bhahstruct, REAL Cartx, RE
 #include "NRPY+unrescale+basis_transform_to_Cartesian_metric.h"
 }
 
-void BHaH_set_Tmunu( const int rgrid, const REAL rmax, REAL *in_Tmunu, BHaH_struct *bhahstruct){
-
-  // Define local structures
-  commondata_struct *commondata = bhahstruct->commondata;
-
-  // Define param struct for a single grid
-  griddata_struct *griddata = bhahstruct->griddata;
-  const int grid = 0;
-  params_struct *restrict params = &griddata[grid].params;
-
-  // Define grid points
-  REAL *restrict xx[3];
-  for (int ww = 0; ww < 3; ww++)
-    xx[ww] = griddata[grid].xx[ww];
-
-  // Define evolution grid functions
-  REAL *restrict y_n_gfs = griddata[grid].gridfuncs.y_n_gfs;
-
-  // Define auxiliary grid functions
-  REAL *restrict auxevol_gfs = griddata[grid].gridfuncs.auxevol_gfs;
-  
-#include "set_CodeParameters.h"
-
-#pragma omp parallel for
-    for(int i2=0; i2<Nxx_plus_2NGHOSTS2; i2++) {
-        // const REAL xx2 = xx[2][i2];
-        for(int i1=0; i1<Nxx_plus_2NGHOSTS1; i1++) {
-            // const REAL xx1 = xx[1][i1];
-            for(int i0=0; i0<Nxx_plus_2NGHOSTS0; i0++) {
-                // const REAL xx0 = xx[0][i0];
-
-                REAL xCart[3];
-                xx_to_Cart(commondata, params, xx, i0, i1, i2, xCart);
-
-/**
- * Thiago says: TODO: To populate Tmunu at every grid point, we need:
- * 
- *                    1. All 10 Tmunu components in Cartesian coordinates:
- * 
- *                        T4CartUUtt, T4CartUUtx, T4CartUUty, T4CartUUtz,
- *                        T4CartUUxx, T4CartUUxy, T4CartUUxz
- *                        T4CartUUyy, T4CartUUyz, T4CartUUzz
- * 
- *                    2. Transform the above components from Cartesian 
- *                       to curvilinar (spherical) coordinates.
- * 
- *                    3. Populate all auxevol_gfs[IDX4(T4UUijGF, i0, i1, i2)]
- * 
- */
-
-                auxevol_gfs[IDX4(T4UU00GF, i0, i1, i2)] = 0;
-                auxevol_gfs[IDX4(T4UU01GF, i0, i1, i2)] = 0;
-                auxevol_gfs[IDX4(T4UU02GF, i0, i1, i2)] = 0;
-                auxevol_gfs[IDX4(T4UU03GF, i0, i1, i2)] = 0;
-                auxevol_gfs[IDX4(T4UU11GF, i0, i1, i2)] = 0;
-                auxevol_gfs[IDX4(T4UU12GF, i0, i1, i2)] = 0;
-                auxevol_gfs[IDX4(T4UU13GF, i0, i1, i2)] = 0;
-                auxevol_gfs[IDX4(T4UU22GF, i0, i1, i2)] = 0;
-                auxevol_gfs[IDX4(T4UU23GF, i0, i1, i2)] = 0;
-                auxevol_gfs[IDX4(T4UU33GF, i0, i1, i2)] = 0;
-            }
-        }
-    }
-}
 
 void BHaH_output_file( char *filename, BHaH_struct *bhahstruct, int dim)
 {
@@ -334,6 +268,21 @@ int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_st
 #define TMUNU_AVG_COMP 10
 
 void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGrid, BHaH_struct *bhahstruct){
+/**
+ * Thiago says: TODO: To populate Tmunu at every grid point, we need:
+ * 
+ *                    1. All 10 Tmunu components in Cartesian coordinates:
+ * 
+ *                        T4CartUUtt, T4CartUUtx, T4CartUUty, T4CartUUtz,
+ *                        T4CartUUxx, T4CartUUxy, T4CartUUxz
+ *                        T4CartUUyy, T4CartUUyz, T4CartUUzz
+ * 
+ *                    2. Transform the above components from Cartesian 
+ *                       to curvilinar (spherical) coordinates.
+ * 
+ *                    3. Populate all auxevol_gfs[IDX4(T4UUijGF, i0, i1, i2)]
+ * 
+ */
 
   // Define local structures
   commondata_struct *commondata = bhahstruct->commondata;
