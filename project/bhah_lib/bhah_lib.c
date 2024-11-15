@@ -4,34 +4,35 @@
 /**
  * List of functions that need to be defined.
  * Some of these functions will be merged and/or deprecated.
- * 
+ *
  * void BHaH_setup(const int nx1, const int nx2, const int nx3,
  *                 const REAL cfl, const REAL rmax, BHaH_struct *bhahstruct);
- * 
+ *
  * void BHaH_initialize( BHaH_struct *bhahstruct);
- * 
+ *
  * double BHaH_get_timestep( BHaH_struct *bhahstruct); <- this one should be deprecated
- * 
+ *
  * void BHaH_advance_timestep( const REAL t_final, BHaH_struct *bhahstruct);
- * 
+ *
  * void BHaH_get_metric_extrinsic_curvature(REAL Cartx, REAL Carty, REAL Cartz,
  *                                          BHaH_struct *bhahstruct, REAL *alpha_out,
  *                                          REAL *beta0, REAL *beta1, REAL *beta2,
  *                                          REAL (*gammaDD)[3], REAL (*KDD)[3]);
- * 
+ *
  * void BHaH_set_Tmunu(const int rgrid, const REAL rmax, REAL *in_Tmunu, BHaH_struct *bhahstruct);
- * 
+ *
  *     NOTE: This function is no longer used and will not be included in the new library.
- * 
+ *
  * BHaH_output_file(char *filename, BHaH_struct *bhahstruct, int dim);
- * 
+ *
  * int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_struct *bhahstruct);
- * 
+ *
  * void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGrid, BHaH_struct *bhahstruct);
-**/
+ **/
 
-void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl, 
-                const REAL rmax, BHaH_struct *bhahstruct){
+void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl,
+                const REAL rmax, BHaH_struct *bhahstruct)
+{
 
   // Step 1.a: Allocate memory for the commondata struct
   commondata_struct *commondata = (commondata_struct *)malloc(sizeof(commondata_struct));
@@ -69,7 +70,8 @@ void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl,
   numerical_grids_and_timestep(commondata, griddata, calling_for_first_time);
 
   // Step 1.f: Allocate memory for all gridfunctions
-  for (int grid = 0; grid < n_grids; grid++) {
+  for (int grid = 0; grid < n_grids; grid++)
+  {
     MoL_malloc_y_n_gfs(commondata, &griddata[grid].params, &griddata[grid].gridfuncs);
     MoL_malloc_non_y_n_gfs(commondata, &griddata[grid].params, &griddata[grid].gridfuncs);
   }
@@ -83,8 +85,9 @@ void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl,
 }
 
 void BHaH_get_metric_extrinsic_curvature(BHaH_struct *bhahstruct, REAL Cartx, REAL Carty, REAL Cartz,
-                                         REAL *alpha_out, REAL *beta0, REAL *beta1, REAL *beta2, 
-                                         REAL gammaDD[3][3], REAL KDD[3][3]){
+                                         REAL *alpha_out, REAL *beta0, REAL *beta1, REAL *beta2,
+                                         REAL gammaDD[3][3], REAL KDD[3][3])
+{
 
   // Define local structures
   commondata_struct *commondata = bhahstruct->commondata;
@@ -101,14 +104,14 @@ void BHaH_get_metric_extrinsic_curvature(BHaH_struct *bhahstruct, REAL Cartx, RE
 
   // Define evolution grid functions
   REAL *restrict y_n_gfs = griddata[grid].gridfuncs.y_n_gfs;
-  
+
 #include "set_CodeParameters.h"
 
   // Initialize quantities to be interpolated
-  REAL cf = 0., alpha = 0., vetU0=0.,vetU1=0.,vetU2=0.;
-  REAL hDD00=0.,hDD01=0.,hDD02=0.,hDD11=0.,hDD12=0.,hDD22=0.;
-  REAL aDD00=0.,aDD01=0.,aDD02=0.,aDD11=0.,aDD12=0.,aDD22=0.;
-  REAL trK=0.;
+  REAL cf = 0., alpha = 0., vetU0 = 0., vetU1 = 0., vetU2 = 0.;
+  REAL hDD00 = 0., hDD01 = 0., hDD02 = 0., hDD11 = 0., hDD12 = 0., hDD22 = 0.;
+  REAL aDD00 = 0., aDD01 = 0., aDD02 = 0., aDD11 = 0., aDD12 = 0., aDD22 = 0.;
+  REAL trK = 0.;
 
   // Begin Lagrange interpolator
   const int num_interp_gfs = 18;
@@ -116,27 +119,27 @@ void BHaH_get_metric_extrinsic_curvature(BHaH_struct *bhahstruct, REAL Cartx, RE
                                     HDD00GF, HDD01GF, HDD02GF, HDD11GF, HDD12GF, HDD22GF,
                                     ADD00GF, ADD01GF, ADD02GF, ADD11GF, ADD12GF, ADD22GF};
 
-  const int num_interp_pts = 1;  // Interpolating a single Cartesian point (Cartx, Carty, Cartz) 
-  const int N0 = 2, N1 = 2, N2 = 2;  // Size of interpolation stencil;
+  const int num_interp_pts = 1;     // Interpolating a single Cartesian point (Cartx, Carty, Cartz)
+  const int N0 = 2, N1 = 2, N2 = 2; // Size of interpolation stencil;
   const REAL xCart[3] = {Cartx, Carty, Cartz};
-  REAL xx012[3];  // Grid point in reference-metric coordinates, to be computed
-  int _Cart_to_i0i1i2[3];  // Nearest indices to point (Cartx, Carty, Cartz): not needed here, but required for function call.
+  REAL xx012[3];          // Grid point in reference-metric coordinates, to be computed
+  int _Cart_to_i0i1i2[3]; // Nearest indices to point (Cartx, Carty, Cartz): not needed here, but required for function call.
   Cart_to_xx_and_nearest_i0i1i2(commondata, params, xCart, xx012, _Cart_to_i0i1i2);
 
   const REAL list_of_interp_pts_x0[] = {xx012[0]};
   const REAL list_of_interp_pts_x1[] = {xx012[1]};
   const REAL list_of_interp_pts_x2[] = {xx012[2]};
-  const REAL dx012_term_inv = 1.0 / (pow(dxx0,N0)*pow(dxx1,N1)*pow(dxx2,N2));
-  REAL interp_output[num_interp_pts*num_interp_gfs];
+  const REAL dx012_term_inv = 1.0 / (pow(dxx0, N0) * pow(dxx1, N1) * pow(dxx2, N2));
+  REAL interp_output[num_interp_pts * num_interp_gfs];
 
-  uniform_Lagrange_interp_3D(Nxx_plus_2NGHOSTS0, Nxx_plus_2NGHOSTS1, Nxx_plus_2NGHOSTS2,  xx,
-                              &dx012_term_inv, y_n_gfs,
-                              num_interp_gfs, list_of_interp_gfs,
-                              num_interp_pts, list_of_interp_pts_x0, list_of_interp_pts_x1, list_of_interp_pts_x2,
-                              N0, N1, N2, interp_output);
+  uniform_Lagrange_interp_3D(Nxx_plus_2NGHOSTS0, Nxx_plus_2NGHOSTS1, Nxx_plus_2NGHOSTS2, xx,
+                             &dx012_term_inv, y_n_gfs,
+                             num_interp_gfs, list_of_interp_gfs,
+                             num_interp_pts, list_of_interp_pts_x0, list_of_interp_pts_x1, list_of_interp_pts_x2,
+                             N0, N1, N2, interp_output);
   alpha = interp_output[0];
-  cf    = interp_output[1];
-  trK   = interp_output[2];
+  cf = interp_output[1];
+  trK = interp_output[2];
 
   vetU0 = interp_output[3];
   vetU1 = interp_output[4];
@@ -161,8 +164,7 @@ void BHaH_get_metric_extrinsic_curvature(BHaH_struct *bhahstruct, REAL Cartx, RE
 #include "NRPY+unrescale+basis_transform_to_Cartesian_metric.h"
 }
 
-
-void BHaH_output_file( char *filename, BHaH_struct *bhahstruct, int dim)
+void BHaH_output_file(char *filename, BHaH_struct *bhahstruct, int dim)
 {
 
   // Define local structures
@@ -185,7 +187,7 @@ void BHaH_output_file( char *filename, BHaH_struct *bhahstruct, int dim)
   REAL *restrict auxevol_gfs = griddata[grid].gridfuncs.auxevol_gfs;
   // Define diagnostics grid functions
   REAL *restrict diagnostic_output_gfs = griddata[grid].gridfuncs.diagnostic_output_gfs;
-  
+
 #include "set_CodeParameters.h"
 
   // Evaluate Hamiltonian and momentum constraints
@@ -193,38 +195,42 @@ void BHaH_output_file( char *filename, BHaH_struct *bhahstruct, int dim)
 
   FILE *outfile = fopen(filename, "w");
 
-/**
- * Thiago says: FIXME: TOV_Mass macro is not defined.
- * 
- * Thiago says: TODO: Output momentum constraint as well.
- * 
- */
-  const REAL TOV_Mass = 1.0;  /** FIXME: set it to 1 for now **/
+  /**
+   * Thiago says: FIXME: TOV_Mass macro is not defined.
+   *
+   * Thiago says: TODO: Output momentum constraint as well.
+   *
+   */
+  const REAL TOV_Mass = 1.0; /** FIXME: set it to 1 for now **/
 
-  LOOP_REGION(NGHOSTS,Nxx_plus_2NGHOSTS0-NGHOSTS,
-              NGHOSTS,Nxx_plus_2NGHOSTS1-NGHOSTS,
-              NGHOSTS,Nxx_plus_2NGHOSTS2-NGHOSTS) {
-    const int idx = IDX3(i0,i1,i2);
+  LOOP_REGION(NGHOSTS, Nxx_plus_2NGHOSTS0 - NGHOSTS,
+              NGHOSTS, Nxx_plus_2NGHOSTS1 - NGHOSTS,
+              NGHOSTS, Nxx_plus_2NGHOSTS2 - NGHOSTS)
+  {
+    const int idx = IDX3(i0, i1, i2);
     REAL xx0 = xx[0][i0];
     REAL xx1 = xx[1][i1];
     REAL xx2 = xx[2][i2];
     REAL xCart[3];
     xx_to_Cart(commondata, params, xx, i0, i1, i2, xCart);
-    if( dim == 2) {
-      fprintf(outfile,"%e %e %e %e\n",
-              xCart[1]/TOV_Mass,xCart[2]/TOV_Mass,
-              y_n_gfs[IDX4pt(CFGF,idx)],log10(fabs(diagnostic_output_gfs[IDX4pt(HGF,idx)])));
+    if (dim == 2)
+    {
+      fprintf(outfile, "%e %e %e %e\n",
+              xCart[1] / TOV_Mass, xCart[2] / TOV_Mass,
+              y_n_gfs[IDX4pt(CFGF, idx)], log10(fabs(diagnostic_output_gfs[IDX4pt(HGF, idx)])));
     }
-    else {
-      fprintf(outfile,"%e %e %e %e %e\n",
-              xCart[0]/TOV_Mass,xCart[1]/TOV_Mass,xCart[2]/TOV_Mass,
-              y_n_gfs[IDX4pt(CFGF,idx)],log10(fabs(diagnostic_output_gfs[IDX4pt(HGF,idx)])));
+    else
+    {
+      fprintf(outfile, "%e %e %e %e %e\n",
+              xCart[0] / TOV_Mass, xCart[1] / TOV_Mass, xCart[2] / TOV_Mass,
+              y_n_gfs[IDX4pt(CFGF, idx)], log10(fabs(diagnostic_output_gfs[IDX4pt(HGF, idx)])));
     }
   }
   fclose(outfile);
 }
 
-int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_struct *bhahstruct){
+int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_struct *bhahstruct)
+{
 
   // Define local structures
   commondata_struct *commondata = bhahstruct->commondata;
@@ -239,50 +245,37 @@ int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_st
   for (int ww = 0; ww < 3; ww++)
     xx[ww] = griddata[grid].xx[ww];
 
-  
 #include "set_CodeParameters.h"
 
   int nCartGrid = 0;
-  LOOP_REGION(0, Nxx_plus_2NGHOSTS0, 0, Nxx_plus_2NGHOSTS1, 0, Nxx_plus_2NGHOSTS2) {
+  LOOP_REGION(0, Nxx_plus_2NGHOSTS0, 0, Nxx_plus_2NGHOSTS1, 0, Nxx_plus_2NGHOSTS2)
+  {
 
-    const int idx = IDX3(i0,i1,i2);
+    const int idx = IDX3(i0, i1, i2);
     const REAL xx0 = xx[0][i0];
     const REAL xx1 = xx[1][i1];
     const REAL xx2 = xx[2][i2];
     REAL xCart[3];
     xx_to_Cart(commondata, params, xx, i0, i1, i2, xCart);
 
-    if( abs(xCart[0]) > xCartMax[0] || abs(xCart[1]) > xCartMax[1] || fabs(xCart[2]) > xCartMax[2])
-        continue;
+    if (abs(xCart[0]) > xCartMax[0] || abs(xCart[1]) > xCartMax[1] || fabs(xCart[2]) > xCartMax[2])
+      continue;
 
-    xCartGrid[3*nCartGrid+0] = xCart[0]; xCartGrid[3*nCartGrid+1] = xCart[1]; xCartGrid[3*nCartGrid+2] = xCart[2];
+    xCartGrid[3 * nCartGrid + 0] = xCart[0];
+    xCartGrid[3 * nCartGrid + 1] = xCart[1];
+    xCartGrid[3 * nCartGrid + 2] = xCart[2];
     indices[nCartGrid++] = idx;
   }
   return nCartGrid;
 }
-
 
 /**
  * Thiago says: NOTE: TMUNU_AVG_COMP is also defined in GR_Utils.h
  */
 #define TMUNU_AVG_COMP 10
 
-void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGrid, BHaH_struct *bhahstruct){
-/**
- * Thiago says: TODO: To populate Tmunu at every grid point, we need:
- * 
- *                    1. All 10 Tmunu components in Cartesian coordinates:
- * 
- *                        T4CartUUtt, T4CartUUtx, T4CartUUty, T4CartUUtz,
- *                        T4CartUUxx, T4CartUUxy, T4CartUUxz
- *                        T4CartUUyy, T4CartUUyz, T4CartUUzz
- * 
- *                    2. Transform the above components from Cartesian 
- *                       to curvilinar (spherical) coordinates.
- * 
- *                    3. Populate all auxevol_gfs[IDX4(T4UUijGF, i0, i1, i2)]
- * 
- */
+void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGrid, BHaH_struct *bhahstruct)
+{
 
   // Define local structures
   commondata_struct *commondata = bhahstruct->commondata;
@@ -300,66 +293,43 @@ void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGri
   // Define auxiliary grid functions
   REAL *restrict auxevol_gfs = griddata[grid].gridfuncs.auxevol_gfs;
 
-  
 #include "set_CodeParameters.h"
 
-  LOOP_REGION(0, Nxx_plus_2NGHOSTS0, 0, Nxx_plus_2NGHOSTS1, 0, Nxx_plus_2NGHOSTS2) {
+  for (int i = 0; i < nCartGrid; i++)
+  {
+    const int idx = indices[i];
+    int i0 = -10, i1 = -10, i2 = -10;
+    IDX3S_TO_ijk(idx, i0, i1, i2);
 
-    const int idx = IDX3(i0,i1,i2);
     const REAL xx0 = xx[0][i0];
     const REAL xx1 = xx[1][i1];
     const REAL xx2 = xx[2][i2];
-    REAL xCart[3];
-    xx_to_Cart(commondata, params, xx, i0, i1, i2, xCart);
 
-    // Zero everything
-    auxevol_gfs[IDX4(T4UU00GF, i0, i1, i2)] = 0.;
-    auxevol_gfs[IDX4(T4UU01GF, i0, i1, i2)] = 0.;
-    auxevol_gfs[IDX4(T4UU02GF, i0, i1, i2)] = 0.;
-    auxevol_gfs[IDX4(T4UU03GF, i0, i1, i2)] = 0.;
-    auxevol_gfs[IDX4(T4UU11GF, i0, i1, i2)] = 0.;
-    auxevol_gfs[IDX4(T4UU12GF, i0, i1, i2)] = 0.;
-    auxevol_gfs[IDX4(T4UU13GF, i0, i1, i2)] = 0.;
-    auxevol_gfs[IDX4(T4UU22GF, i0, i1, i2)] = 0.;
-    auxevol_gfs[IDX4(T4UU23GF, i0, i1, i2)] = 0.;
-    auxevol_gfs[IDX4(T4UU33GF, i0, i1, i2)] = 0.;
+    // Set components of Tmunu in Cartesian coordinates
+    REAL T4CartUU00 = TmunuGrid[idx * TMUNU_AVG_COMP + 0];
+    REAL T4CartUU01 = TmunuGrid[idx * TMUNU_AVG_COMP + 1];
+    REAL T4CartUU02 = TmunuGrid[idx * TMUNU_AVG_COMP + 2];
+    REAL T4CartUU03 = TmunuGrid[idx * TMUNU_AVG_COMP + 3];
+    REAL T4CartUU11 = TmunuGrid[idx * TMUNU_AVG_COMP + 4];
+    REAL T4CartUU12 = TmunuGrid[idx * TMUNU_AVG_COMP + 5];
+    REAL T4CartUU13 = TmunuGrid[idx * TMUNU_AVG_COMP + 6];
+    REAL T4CartUU22 = TmunuGrid[idx * TMUNU_AVG_COMP + 7];
+    REAL T4CartUU23 = TmunuGrid[idx * TMUNU_AVG_COMP + 8];
+    REAL T4CartUU33 = TmunuGrid[idx * TMUNU_AVG_COMP + 9];
+
+    // Compute components of Tmunu in spherical coordinates
+    REAL T4UU00, T4UU01, T4UU02, T4UU03, T4UU11, T4UU12, T4UU13, T4UU22, T4UU23, T4UU33;
+#include "transform_T4UU_from_Cart_to_spherical.h"
+
+    auxevol_gfs[IDX4(T4UU00GF, i0, i1, i2)] = T4UU00;
+    auxevol_gfs[IDX4(T4UU01GF, i0, i1, i2)] = T4UU01;
+    auxevol_gfs[IDX4(T4UU02GF, i0, i1, i2)] = T4UU02;
+    auxevol_gfs[IDX4(T4UU03GF, i0, i1, i2)] = T4UU03;
+    auxevol_gfs[IDX4(T4UU11GF, i0, i1, i2)] = T4UU11;
+    auxevol_gfs[IDX4(T4UU12GF, i0, i1, i2)] = T4UU12;
+    auxevol_gfs[IDX4(T4UU13GF, i0, i1, i2)] = T4UU13;
+    auxevol_gfs[IDX4(T4UU22GF, i0, i1, i2)] = T4UU22;
+    auxevol_gfs[IDX4(T4UU23GF, i0, i1, i2)] = T4UU23;
+    auxevol_gfs[IDX4(T4UU33GF, i0, i1, i2)] = T4UU33;
   }
-
-
-/**
- * Thiago says: TODO: Modify this to include all 10 components
- */
-
-
-    // for( int i = 0; i < nCartGrid; i++) {
-    //     const int idx = indices[i];
-    //     int i0 = -10, i1 = -10, i2 = -10;
-    //     IDX3S_TO_ijk(idx,i0,i1,i2);
-    //     const REAL xx0 = xx[0][i0];
-    //     const REAL xx1 = xx[1][i1];
-    //     const REAL xx2 = xx[2][i2];
-    //     const REAL rbar = get_rbar(&params, xx, i0, i1, i2);
-    //     REAL T00, T11, T22, T33;
-    //     T00 = TmunuGrid[idx*TMUNU_AVG_COMP+0];
-    //     T11 = TmunuGrid[idx*TMUNU_AVG_COMP+1];
-    //     T22 = TmunuGrid[idx*TMUNU_AVG_COMP+2];
-    //     T33 = TmunuGrid[idx*TMUNU_AVG_COMP+3];
-
-
-    //     T22 /= rbar*rbar;
-    //     const REAL theta = xx1;
-
-    //     T33 /= rbar*rbar*sin(theta)*sin(theta);
-    //     auxevol_gfs[IDX4(T4UU00GF, i0, i1, i2)] = T00;
-    //     auxevol_gfs[IDX4(T4UU01GF, i0, i1, i2)] = 0;
-    //     auxevol_gfs[IDX4(T4UU02GF, i0, i1, i2)] = 0;
-    //     auxevol_gfs[IDX4(T4UU03GF, i0, i1, i2)] = 0;
-    //     auxevol_gfs[IDX4(T4UU11GF, i0, i1, i2)] = T11;
-    //     auxevol_gfs[IDX4(T4UU12GF, i0, i1, i2)] = 0;
-    //     auxevol_gfs[IDX4(T4UU13GF, i0, i1, i2)] = 0;
-    //     auxevol_gfs[IDX4(T4UU22GF, i0, i1, i2)] = T22;
-    //     auxevol_gfs[IDX4(T4UU23GF, i0, i1, i2)] = 0;
-    //     auxevol_gfs[IDX4(T4UU33GF, i0, i1, i2)] = T33;
-
-    // }
 }
