@@ -1,6 +1,14 @@
 #include "bhah_lib.h"
 #include "uniform_Lagrange_interp_3D.h"
 
+#define IDX3_TO_ijk(idx, i, j, k)                            \
+  do                                                         \
+  {                                                          \
+    (k) = (idx) / (Nxx_plus_2NGHOSTS0 * Nxx_plus_2NGHOSTS1); \
+    (j) = ((idx) / Nxx_plus_2NGHOSTS0) % Nxx_plus_2NGHOSTS1; \
+    (i) = (idx) % Nxx_plus_2NGHOSTS0;                        \
+  } while (0)
+
 /**
  * List of functions that need to be defined.
  * Some of these functions will be merged and/or deprecated.
@@ -31,11 +39,11 @@
  **/
 
 void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl,
-                const REAL rmax, BHaH_struct *bhahstruct)
+  const REAL rmax, BHaH_struct* bhahstruct)
 {
 
   // Step 1.a: Allocate memory for the commondata struct
-  commondata_struct *commondata = (commondata_struct *)malloc(sizeof(commondata_struct));
+  commondata_struct* commondata = (commondata_struct*)malloc(sizeof(commondata_struct));
 
   // Step 1.b: Set each commondata CodeParameter to default.
   commondata_struct_set_to_default(commondata);
@@ -43,7 +51,7 @@ void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl,
   // Step 1.c: Allocate NUMGRIDS griddata arrays, each containing
   //           data specific to an individual grid.
   const int n_grids = commondata->NUMGRIDS;
-  griddata_struct *griddata = (griddata_struct *)malloc(sizeof(griddata_struct) * n_grids);
+  griddata_struct* griddata = (griddata_struct*)malloc(sizeof(griddata_struct) * n_grids);
 
   // Step 1.d: Set each CodeParameter in griddata.params to default.
   params_struct_set_to_default(commondata, griddata);
@@ -70,8 +78,7 @@ void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl,
   numerical_grids_and_timestep(commondata, griddata, calling_for_first_time);
 
   // Step 1.f: Allocate memory for all gridfunctions
-  for (int grid = 0; grid < n_grids; grid++)
-  {
+  for (int grid = 0; grid < n_grids; grid++) {
     MoL_malloc_y_n_gfs(commondata, &griddata[grid].params, &griddata[grid].gridfuncs);
     MoL_malloc_non_y_n_gfs(commondata, &griddata[grid].params, &griddata[grid].gridfuncs);
   }
@@ -84,26 +91,26 @@ void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl,
   bhahstruct->commondata = commondata;
 }
 
-void BHaH_get_metric_extrinsic_curvature(BHaH_struct *bhahstruct, REAL Cartx, REAL Carty, REAL Cartz,
-                                         REAL *alpha_out, REAL *beta0, REAL *beta1, REAL *beta2,
-                                         REAL gammaDD[3][3], REAL KDD[3][3])
+void BHaH_get_metric_extrinsic_curvature(BHaH_struct* bhahstruct, REAL Cartx, REAL Carty, REAL Cartz,
+  REAL* alpha_out, REAL* beta0, REAL* beta1, REAL* beta2,
+  REAL gammaDD[3][3], REAL KDD[3][3])
 {
 
   // Define local structures
-  commondata_struct *commondata = bhahstruct->commondata;
+  commondata_struct* commondata = bhahstruct->commondata;
 
   // Define param struct for a single grid
-  griddata_struct *griddata = bhahstruct->griddata;
+  griddata_struct* griddata = bhahstruct->griddata;
   const int grid = 0;
-  params_struct *restrict params = &griddata[grid].params;
+  params_struct* restrict params = &griddata[grid].params;
 
   // Define grid points
-  REAL *restrict xx[3];
+  REAL* restrict xx[3];
   for (int ww = 0; ww < 3; ww++)
     xx[ww] = griddata[grid].xx[ww];
 
   // Define evolution grid functions
-  REAL *restrict y_n_gfs = griddata[grid].gridfuncs.y_n_gfs;
+  REAL* restrict y_n_gfs = griddata[grid].gridfuncs.y_n_gfs;
 
 #include "set_CodeParameters.h"
 
@@ -115,28 +122,28 @@ void BHaH_get_metric_extrinsic_curvature(BHaH_struct *bhahstruct, REAL Cartx, RE
 
   // Begin Lagrange interpolator
   const int num_interp_gfs = 18;
-  const int list_of_interp_gfs[] = {ALPHAGF, CFGF, TRKGF, VETU0GF, VETU1GF, VETU2GF,
+  const int list_of_interp_gfs[] = { ALPHAGF, CFGF, TRKGF, VETU0GF, VETU1GF, VETU2GF,
                                     HDD00GF, HDD01GF, HDD02GF, HDD11GF, HDD12GF, HDD22GF,
-                                    ADD00GF, ADD01GF, ADD02GF, ADD11GF, ADD12GF, ADD22GF};
+                                    ADD00GF, ADD01GF, ADD02GF, ADD11GF, ADD12GF, ADD22GF };
 
   const int num_interp_pts = 1;     // Interpolating a single Cartesian point (Cartx, Carty, Cartz)
   const int N0 = 2, N1 = 2, N2 = 2; // Size of interpolation stencil;
-  const REAL xCart[3] = {Cartx, Carty, Cartz};
+  const REAL xCart[3] = { Cartx, Carty, Cartz };
   REAL xx012[3];          // Grid point in reference-metric coordinates, to be computed
   int _Cart_to_i0i1i2[3]; // Nearest indices to point (Cartx, Carty, Cartz): not needed here, but required for function call.
   Cart_to_xx_and_nearest_i0i1i2(commondata, params, xCart, xx012, _Cart_to_i0i1i2);
 
-  const REAL list_of_interp_pts_x0[] = {xx012[0]};
-  const REAL list_of_interp_pts_x1[] = {xx012[1]};
-  const REAL list_of_interp_pts_x2[] = {xx012[2]};
+  const REAL list_of_interp_pts_x0[] = { xx012[0] };
+  const REAL list_of_interp_pts_x1[] = { xx012[1] };
+  const REAL list_of_interp_pts_x2[] = { xx012[2] };
   const REAL dx012_term_inv = 1.0 / (pow(dxx0, N0) * pow(dxx1, N1) * pow(dxx2, N2));
   REAL interp_output[num_interp_pts * num_interp_gfs];
 
   uniform_Lagrange_interp_3D(Nxx_plus_2NGHOSTS0, Nxx_plus_2NGHOSTS1, Nxx_plus_2NGHOSTS2, xx,
-                             &dx012_term_inv, y_n_gfs,
-                             num_interp_gfs, list_of_interp_gfs,
-                             num_interp_pts, list_of_interp_pts_x0, list_of_interp_pts_x1, list_of_interp_pts_x2,
-                             N0, N1, N2, interp_output);
+    &dx012_term_inv, y_n_gfs,
+    num_interp_gfs, list_of_interp_gfs,
+    num_interp_pts, list_of_interp_pts_x0, list_of_interp_pts_x1, list_of_interp_pts_x2,
+    N0, N1, N2, interp_output);
   alpha = interp_output[0];
   cf = interp_output[1];
   trK = interp_output[2];
@@ -164,36 +171,36 @@ void BHaH_get_metric_extrinsic_curvature(BHaH_struct *bhahstruct, REAL Cartx, RE
 #include "NRPY+unrescale+basis_transform_to_Cartesian_metric.h"
 }
 
-void BHaH_output_file(char *filename, BHaH_struct *bhahstruct, int dim)
+void BHaH_output_file(char* filename, BHaH_struct* bhahstruct, int dim)
 {
 
   // Define local structures
-  commondata_struct *commondata = bhahstruct->commondata;
+  commondata_struct* commondata = bhahstruct->commondata;
 
   // Define param struct for a single grid
-  griddata_struct *griddata = bhahstruct->griddata;
+  griddata_struct* griddata = bhahstruct->griddata;
   const int grid = 0;
-  params_struct *restrict params = &griddata[grid].params;
+  params_struct* restrict params = &griddata[grid].params;
   // Define rfm_struct for a single grid
-  const rfm_struct *restrict rfmstruct = &griddata[grid].rfmstruct;
+  const rfm_struct* restrict rfmstruct = &griddata[grid].rfmstruct;
 
   // Define grid points
-  REAL *restrict xx[3];
+  REAL* restrict xx[3];
   for (int ww = 0; ww < 3; ww++)
     xx[ww] = griddata[grid].xx[ww];
   // Define evolution grid functions
-  REAL *restrict y_n_gfs = griddata[grid].gridfuncs.y_n_gfs;
+  REAL* restrict y_n_gfs = griddata[grid].gridfuncs.y_n_gfs;
   // Define auxiliary grid functions
-  REAL *restrict auxevol_gfs = griddata[grid].gridfuncs.auxevol_gfs;
+  REAL* restrict auxevol_gfs = griddata[grid].gridfuncs.auxevol_gfs;
   // Define diagnostics grid functions
-  REAL *restrict diagnostic_output_gfs = griddata[grid].gridfuncs.diagnostic_output_gfs;
+  REAL* restrict diagnostic_output_gfs = griddata[grid].gridfuncs.diagnostic_output_gfs;
 
 #include "set_CodeParameters.h"
 
   // Evaluate Hamiltonian and momentum constraints
   constraints_eval(commondata, params, rfmstruct, y_n_gfs, auxevol_gfs, diagnostic_output_gfs);
 
-  FILE *outfile = fopen(filename, "w");
+  FILE* outfile = fopen(filename, "w");
 
   /**
    * Thiago says: FIXME: TOV_Mass macro is not defined.
@@ -204,8 +211,8 @@ void BHaH_output_file(char *filename, BHaH_struct *bhahstruct, int dim)
   const REAL TOV_Mass = 1.0; /** FIXME: set it to 1 for now **/
 
   LOOP_REGION(NGHOSTS, Nxx_plus_2NGHOSTS0 - NGHOSTS,
-              NGHOSTS, Nxx_plus_2NGHOSTS1 - NGHOSTS,
-              NGHOSTS, Nxx_plus_2NGHOSTS2 - NGHOSTS)
+    NGHOSTS, Nxx_plus_2NGHOSTS1 - NGHOSTS,
+    NGHOSTS, Nxx_plus_2NGHOSTS2 - NGHOSTS)
   {
     const int idx = IDX3(i0, i1, i2);
     REAL xx0 = xx[0][i0];
@@ -213,35 +220,33 @@ void BHaH_output_file(char *filename, BHaH_struct *bhahstruct, int dim)
     REAL xx2 = xx[2][i2];
     REAL xCart[3];
     xx_to_Cart(commondata, params, xx, i0, i1, i2, xCart);
-    if (dim == 2)
-    {
+    if (dim == 2) {
       fprintf(outfile, "%e %e %e %e\n",
-              xCart[1] / TOV_Mass, xCart[2] / TOV_Mass,
-              y_n_gfs[IDX4pt(CFGF, idx)], log10(fabs(diagnostic_output_gfs[IDX4pt(HGF, idx)])));
+        xCart[1] / TOV_Mass, xCart[2] / TOV_Mass,
+        y_n_gfs[IDX4pt(CFGF, idx)], log10(fabs(diagnostic_output_gfs[IDX4pt(HGF, idx)])));
     }
-    else
-    {
+    else {
       fprintf(outfile, "%e %e %e %e %e\n",
-              xCart[0] / TOV_Mass, xCart[1] / TOV_Mass, xCart[2] / TOV_Mass,
-              y_n_gfs[IDX4pt(CFGF, idx)], log10(fabs(diagnostic_output_gfs[IDX4pt(HGF, idx)])));
+        xCart[0] / TOV_Mass, xCart[1] / TOV_Mass, xCart[2] / TOV_Mass,
+        y_n_gfs[IDX4pt(CFGF, idx)], log10(fabs(diagnostic_output_gfs[IDX4pt(HGF, idx)])));
     }
   }
   fclose(outfile);
 }
 
-int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_struct *bhahstruct)
+int BHaH_get_gridpoints(int* indices, REAL* xCartGrid, REAL xCartMax[3], BHaH_struct* bhahstruct)
 {
 
   // Define local structures
-  commondata_struct *commondata = bhahstruct->commondata;
+  commondata_struct* commondata = bhahstruct->commondata;
 
   // Define param struct for a single grid
-  griddata_struct *griddata = bhahstruct->griddata;
+  griddata_struct* griddata = bhahstruct->griddata;
   const int grid = 0;
-  params_struct *restrict params = &griddata[grid].params;
+  params_struct* restrict params = &griddata[grid].params;
 
   // Define grid points
-  REAL *restrict xx[3];
+  REAL* restrict xx[3];
   for (int ww = 0; ww < 3; ww++)
     xx[ww] = griddata[grid].xx[ww];
 
@@ -274,32 +279,31 @@ int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_st
  */
 #define TMUNU_AVG_COMP 10
 
-void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGrid, BHaH_struct *bhahstruct)
+void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int* indices, REAL* TmunuGrid, BHaH_struct* bhahstruct)
 {
 
   // Define local structures
-  commondata_struct *commondata = bhahstruct->commondata;
+  commondata_struct* commondata = bhahstruct->commondata;
 
   // Define param struct for a single grid
-  griddata_struct *griddata = bhahstruct->griddata;
+  griddata_struct* griddata = bhahstruct->griddata;
   const int grid = 0;
-  params_struct *restrict params = &griddata[grid].params;
+  params_struct* restrict params = &griddata[grid].params;
 
   // Define grid points
-  REAL *restrict xx[3];
+  REAL* restrict xx[3];
   for (int ww = 0; ww < 3; ww++)
     xx[ww] = griddata[grid].xx[ww];
 
   // Define auxiliary grid functions
-  REAL *restrict auxevol_gfs = griddata[grid].gridfuncs.auxevol_gfs;
+  REAL* restrict auxevol_gfs = griddata[grid].gridfuncs.auxevol_gfs;
 
 #include "set_CodeParameters.h"
 
-  for (int i = 0; i < nCartGrid; i++)
-  {
+  for (int i = 0; i < nCartGrid; i++) {
     const int idx = indices[i];
     int i0 = -10, i1 = -10, i2 = -10;
-    IDX3S_TO_ijk(idx, i0, i1, i2);
+    IDX3_TO_ijk(idx, i0, i1, i2);
 
     const REAL xx0 = xx[0][i0];
     const REAL xx1 = xx[1][i1];
