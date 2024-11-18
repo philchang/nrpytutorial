@@ -178,3 +178,21 @@ void TOVola_interp(const commondata_struct *restrict commondata, const params_st
   initial_data->T4SphorCartUU23 = 0.0;
   initial_data->T4SphorCartUU33 = P_val / (exp4phi_val * r_iso * r_iso * sin(theta) * sin(theta));
 }
+
+/**
+ * Provide radial high-order interpolation from TOVola grids onto an radial point r in the Spherical basis.
+ */
+void TOVola_radial_only_interp(const commondata_struct *restrict commondata, const params_struct *restrict params, const REAL r_iso,
+                   const ID_persist_struct *restrict ID_persist,  REAL *rho_baryon, REAL *pressure) {
+
+  // Perform pointwise interpolation to radius r using ID_persist data
+  REAL rho_energy_val, rho_baryon_val, P_val, M_val, expnu_val, exp4phi_val;
+  TOVola_TOV_interpolate_1D(r_iso, commondata, commondata->max_interpolation_stencil_size, ID_persist->numpoints_arr, ID_persist->r_Schw_arr,
+                            ID_persist->rho_energy_arr, ID_persist->rho_baryon_arr, ID_persist->P_arr, ID_persist->M_arr, ID_persist->expnu_arr,
+                            ID_persist->exp4phi_arr, ID_persist->r_iso_arr, &rho_energy_val, &rho_baryon_val, &P_val, &M_val, &expnu_val,
+                            &exp4phi_val);
+
+  // Assign interpolated values to rho_baryon_val and P_val
+  *rho_baryon = rho_baryon_val;
+  *pressure = P_val;
+}
