@@ -8,7 +8,7 @@ import nrpy.indexedexp as ixp
 import nrpy.helpers.jacobians as jac
 import nrpy.c_codegen as ccg
 
-T4CartUU = ixp.declarerank2("T4CartUU", dimension=4, symmetry="01")
+T4CartUU = ixp.declarerank2("T4CartUU", dimension=4, symmetry="sym01")
 
 CoordSystem = "Spherical"
 
