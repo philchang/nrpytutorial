@@ -328,3 +328,16 @@ void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGri
     auxevol_gfs[IDX4(T4UU33GF, i0, i1, i2)] = T4UU33;
   }
 }
+
+void BHaH_set_TOV(BHaH_struct *bhahstruct) {
+
+  // Define local structures
+  commondata_struct *commondata = bhahstruct->commondata;
+
+  // Define param struct for a single grid
+  griddata_struct *griddata = bhahstruct->griddata;
+  const int grid = 0;
+  params_struct *restrict params = &griddata[grid].params;
+
+
+}
