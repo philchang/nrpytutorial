@@ -108,5 +108,6 @@ void xx_to_Cart(const commondata_struct *restrict commondata, const params_struc
 void xx_to_Cart__rfm__Spherical(const commondata_struct *restrict commondata, const params_struct *restrict params, REAL *restrict xx[3],
                                 const int i0, const int i1, const int i2, REAL xCart[3]);
 void TOVola_radial_only_interp(const commondata_struct *restrict commondata, const params_struct *restrict params, const REAL r_iso,
-                               const ID_persist_struct *restrict ID_persist,  REAL *rho_baryon, REAL *pressure);
-void manga_radial_initial_data(commondata_struct *restrict commondata, griddata_struct *restrict griddata);
+                               const ID_persist_struct *restrict ID_persist, REAL *rho_baryon, REAL *pressure);
+void manga_radial_initial_data(commondata_struct *restrict commondata, griddata_struct *restrict griddata,
+                               const int num_radial_pts, REAL *restrict r_axis, REAL *restrict rho_baryon, REAL *restrict pressure);
