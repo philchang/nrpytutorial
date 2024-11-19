@@ -52,10 +52,19 @@ void manga_radial_initial_data(commondata_struct *restrict commondata, griddata_
 
   // Populate arrays by interpolating rho_baryon and pressure onto r_axis
   for (int i = 0; i < num_radial_pts; i++) {
-    const x = dx / 2.0 + dx * i;
+    REAL x = dx / 2.0 + dx * i;
     r_axis[i] = RMAX * sinh(x / local_SINHW) / sinh(1.0 / local_SINHW);
     TOVola_radial_only_interp(commondata, params, r_axis[i], &ID_persist, &rho_baryon[i], &pressure[i]);
   }
+
+  /** START DEBUGGING **/
+  // printf("Inside manga_radial_initial_data():\n");
+  // printf("%15s %15s %15s\n", "r_axis", "rho_baryon", "pressure");
+  // printf("-------------------------------------------------------------\n");
+  // for (int i = 0; i < num_radial_pts; i++) {
+  //   printf("%15.6e %15.6e %15.6e\n", r_axis[i], rho_baryon[i], pressure[i]);
+  // }
+  /** END DEBUGGING **/
 
   // Free memory allocated for ID struct
   {
