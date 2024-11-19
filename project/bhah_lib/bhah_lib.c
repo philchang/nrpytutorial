@@ -329,15 +329,13 @@ void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGri
   }
 }
 
-void BHaH_set_TOV(BHaH_struct *bhahstruct) {
+void BHaH_set_TOV(BHaH_struct *bhahstruct, const int num_radial_pts, REAL *restrict r_axis, REAL *restrict rho_baryon, REAL *restrict pressure) {
 
   // Define local structures
   commondata_struct *commondata = bhahstruct->commondata;
 
-  // Define param struct for a single grid
+  // Define griddata struct
   griddata_struct *griddata = bhahstruct->griddata;
-  const int grid = 0;
-  params_struct *restrict params = &griddata[grid].params;
 
-
+  manga_radial_initial_data(commondata, griddata, num_radial_pts, r_axis, rho_baryon, pressure);
 }
