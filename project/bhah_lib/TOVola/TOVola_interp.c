@@ -183,7 +183,7 @@ void TOVola_interp(const commondata_struct *restrict commondata, const params_st
  * Provide radial high-order interpolation from TOVola grids onto an radial point r in the Spherical basis.
  */
 void TOVola_radial_only_interp(const commondata_struct *restrict commondata, const params_struct *restrict params, const REAL r_iso,
-                   const ID_persist_struct *restrict ID_persist,  REAL *rho_baryon, REAL *pressure) {
+                               const ID_persist_struct *restrict ID_persist, REAL *rho_baryon, REAL *pressure) {
 
   // Perform pointwise interpolation to radius r using ID_persist data
   REAL rho_energy_val, rho_baryon_val, P_val, M_val, expnu_val, exp4phi_val;
