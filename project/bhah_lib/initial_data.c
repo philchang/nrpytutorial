@@ -34,37 +34,30 @@ void initial_data(commondata_struct *restrict commondata, griddata_struct *restr
 /**
  * Set radial initial data quantities for MaNGa
  */
-void manga_radial_initial_data(commondata_struct *restrict commondata, griddata_struct *restrict griddata) {
+void manga_radial_initial_data(commondata_struct *restrict commondata, griddata_struct *restrict griddata,
+                               const int num_radial_pts, REAL *restrict r_axis, REAL *restrict rho_baryon, REAL *restrict pressure) {
 
-  // Set single grid index
-  const int grid =0;
+  // Set params struct for a single grid
+  const int grid = 0;
   params_struct *restrict params = &griddata[grid].params;
 
+  // Declare ID struct and populate it with TOV solution
+  ID_persist_struct ID_persist;
+  TOVola_solve(commondata, &ID_persist);
 
-  // Manually sample radial grid for MaNGa
-  const int num_radial_pts = 100;
+  // Declare quantities for sampling local radial axis using SinhSpherical coordinates
   const REAL RMAX = params->RMAX;
   const REAL local_SINHW = 0.2;
-  REAL *restrict r_axis = (REAL *restrict)malloc(sizeof(REAL) * num_radial_pts);
-  const REAL dx = 1.0 / ((REAL) num_radial_pts);
-  for (int i=0; i < num_radial_pts; i++){
+  const REAL dx = 1.0 / ((REAL)num_radial_pts);
+
+  // Populate arrays by interpolating rho_baryon and pressure onto r_axis
+  for (int i = 0; i < num_radial_pts; i++) {
     const x = dx / 2.0 + dx * i;
     r_axis[i] = RMAX * sinh(x / local_SINHW) / sinh(1.0 / local_SINHW);
-  }
-  REAL *restrict rho_baryon = (REAL *restrict)malloc(sizeof(REAL) * num_radial_pts);
-  REAL *restrict pressure = (REAL *restrict)malloc(sizeof(REAL) * num_radial_pts);
-
-
-  ID_persist_struct ID_persist;
-
-
-  for (int i=0; i < num_radial_pts; i++){
-    const x = dx / 2.0 + dx * i;
-    r_axis[i] = RMAX * sinh(x / local_SINHW) / sinh(1.0 / local_SINHW);
-    TOVola_radial_only_interp(commondata, params, r_axis[i], &ID_persist,  &rho_baryon[i], &pressure[i]);
+    TOVola_radial_only_interp(commondata, params, r_axis[i], &ID_persist, &rho_baryon[i], &pressure[i]);
   }
 
-
+  // Free memory allocated for ID struct
   {
     free(ID_persist.r_Schw_arr);
     free(ID_persist.rho_energy_arr);
