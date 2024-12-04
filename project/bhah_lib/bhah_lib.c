@@ -255,7 +255,7 @@ int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_st
     REAL xCart[3];
     xx_to_Cart(commondata, params, xx, i0, i1, i2, xCart);
 
-    if (abs(xCart[0]) > xCartMax[0] || abs(xCart[1]) > xCartMax[1] || fabs(xCart[2]) > xCartMax[2])
+    if (fabs(xCart[0]) > xCartMax[0] || fabs(xCart[1]) > xCartMax[1] || fabs(xCart[2]) > xCartMax[2])
       continue;
 
     xCartGrid[3 * nCartGrid + 0] = xCart[0];
@@ -269,7 +269,7 @@ int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_st
 /**
  * Thiago says: NOTE: TMUNU_AVG_COMP is also defined in GR_Utils.h
  */
-#define TMUNU_AVG_COMP 10
+#define TMUNU_COMP 10
 
 void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGrid, BHaH_struct *bhahstruct) {
 
@@ -301,16 +301,16 @@ void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGri
     const REAL xx2 = xx[2][i2];
 
     // Set components of Tmunu in Cartesian coordinates
-    REAL T4CartUU00 = TmunuGrid[idx * TMUNU_AVG_COMP + 0];
-    REAL T4CartUU01 = TmunuGrid[idx * TMUNU_AVG_COMP + 1];
-    REAL T4CartUU02 = TmunuGrid[idx * TMUNU_AVG_COMP + 2];
-    REAL T4CartUU03 = TmunuGrid[idx * TMUNU_AVG_COMP + 3];
-    REAL T4CartUU11 = TmunuGrid[idx * TMUNU_AVG_COMP + 4];
-    REAL T4CartUU12 = TmunuGrid[idx * TMUNU_AVG_COMP + 5];
-    REAL T4CartUU13 = TmunuGrid[idx * TMUNU_AVG_COMP + 6];
-    REAL T4CartUU22 = TmunuGrid[idx * TMUNU_AVG_COMP + 7];
-    REAL T4CartUU23 = TmunuGrid[idx * TMUNU_AVG_COMP + 8];
-    REAL T4CartUU33 = TmunuGrid[idx * TMUNU_AVG_COMP + 9];
+    REAL T4CartUU00 = TmunuGrid[i * TMUNU_COMP + 0];
+    REAL T4CartUU01 = TmunuGrid[i * TMUNU_COMP + 1];
+    REAL T4CartUU02 = TmunuGrid[i * TMUNU_COMP + 2];
+    REAL T4CartUU03 = TmunuGrid[i * TMUNU_COMP + 3];
+    REAL T4CartUU11 = TmunuGrid[i * TMUNU_COMP + 4];
+    REAL T4CartUU12 = TmunuGrid[i * TMUNU_COMP + 5];
+    REAL T4CartUU13 = TmunuGrid[i * TMUNU_COMP + 6];
+    REAL T4CartUU22 = TmunuGrid[i * TMUNU_COMP + 7];
+    REAL T4CartUU23 = TmunuGrid[i * TMUNU_COMP + 8];
+    REAL T4CartUU33 = TmunuGrid[i * TMUNU_COMP + 9];
 
     // Compute components of Tmunu in spherical coordinates
     REAL T4UU00, T4UU01, T4UU02, T4UU03, T4UU11, T4UU12, T4UU13, T4UU22, T4UU23, T4UU33;
