@@ -339,3 +339,19 @@ void BHaH_set_TOV(BHaH_struct *bhahstruct, const int num_radial_pts, REAL *restr
 
   manga_radial_initial_data(commondata, griddata, num_radial_pts, r_axis, rho_baryon, pressure);
 }
+
+void BHaH_write_checkpoint(BHaH_struct *bhahstruct, char *filename) {
+  // Define local structures
+  commondata_struct *commondata = bhahstruct->commondata;
+  griddata_struct *griddata = bhahstruct->griddata;
+
+  // Write checkpoint using default function, which creates a file named 'checkpoint-conv_factor1.00.dat'
+  write_checkpoint(commondata, griddata);
+
+  // Rename file to the parameter 'filename'
+  const char *default_filename = "checkpoint-conv_factor1.00.dat";
+  if (rename(default_filename, filename) != 0) {
+      perror("BHaH_write_checkpoint: ERROR renaming checkpoint file");
+      exit(EXIT_FAILURE);
+  }
+}
