@@ -18,6 +18,7 @@ void BHaH_output_file(char *filename, BHaH_struct *bhahstruct, int dim);
 int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_struct *bhahstruct);
 void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGrid, BHaH_struct *bhahstruct);
 void BHaH_set_TOV(BHaH_struct *bhahstruct, const int num_radial_pts, REAL *restrict r_axis, REAL *restrict rho_baryon, REAL *restrict pressure);
+void BHaH_write_checkpoint(BHaH_struct *bhahstruct, char *filename);
 
 #ifdef __cplusplus
 }
