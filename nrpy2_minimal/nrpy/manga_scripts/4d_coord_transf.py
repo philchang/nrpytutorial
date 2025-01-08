@@ -10,7 +10,7 @@ import nrpy.c_codegen as ccg
 
 T4CartUU = ixp.declarerank2("T4CartUU", dimension=4, symmetry="sym01")
 
-CoordSystem = "Spherical"
+CoordSystem = "SinhCylindrical"  # "Spherical"
 
 T4UU = jac.basis_transform_4tensorUU_from_Cartesian_to_time_indep_rfmbasis(
     CoordSystem, T4CartUU
@@ -24,6 +24,6 @@ body = ccg.c_codegen(
 )
 
 if __name__ == "__main__":
-    print("Generating file: transform_T4UU_from_Cart_to_spherical.h")
-    with open("transform_T4UU_from_Cart_to_spherical.h", "w") as file:
+    print(f"Generating file: transform_T4UU_from_Cart_to_{CoordSystem}.h")
+    with open(f"transform_T4UU_from_Cart_to_{CoordSystem}.h", "w") as file:
         file.write(body)
