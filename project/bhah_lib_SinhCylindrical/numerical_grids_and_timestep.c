@@ -5,10 +5,17 @@
  */
 void numerical_grids_and_timestep(commondata_struct *restrict commondata, griddata_struct *restrict griddata, bool calling_for_first_time) {
 
+  // Thiago says: I am commenting out the following line as it would set Nxx0, Nxx1, and Nxx2, grid_physical_size, etc to the default values
   // Step 1.a: Set each CodeParameter in griddata.params to default, for MAXNUMGRIDS grids.
-  params_struct_set_to_default(commondata, griddata);
+  // params_struct_set_to_default(commondata, griddata);
+
+  // Thiago says: BHaH tries really hard to set Nxx0, Nxx1 and Nxx2 to default values.
+  //              The numerical_grid_params_Nxx_dxx_xx() function overwrites
+  //              (griddata->params).Nxx0, (griddata->params).Nxx1, and (griddata->params).Nxx2
+  //              with the values of int Nx[3]. So here we set them to the current values, which will overwrite the default values.
   // Independent grids
-  int Nx[3] = {-1, -1, -1};
+  // int Nx[3] = {-1, -1, -1};
+  int Nx[3] = {(griddata->params).Nxx0, (griddata->params).Nxx1, (griddata->params).Nxx2};
 
   // Step 1.b: Set commondata->NUMGRIDS to number of CoordSystems we have
   commondata->NUMGRIDS = 1;
@@ -18,7 +25,7 @@ void numerical_grids_and_timestep(commondata_struct *restrict commondata, gridda
     const bool set_xxmin_xxmax_to_defaults = true;
     int grid = 0;
     griddata[grid].params.CoordSystem_hash = SINHCYLINDRICAL;
-    griddata[grid].params.grid_physical_size = 1.6;
+    // griddata[grid].params.grid_physical_size = 1.6; // Thiago says: commenting this out to keep the value of grid_physical_size to rmax (set in MaNGa)
     numerical_grid_params_Nxx_dxx_xx(commondata, &griddata[grid].params, griddata[grid].xx, Nx, set_xxmin_xxmax_to_defaults);
     grid++;
   }
