@@ -26,18 +26,22 @@
 // #define MIN(A, B) ( ((A) < (B)) ? (A) : (B) )
 // #define MAX(A, B) ( ((A) > (B)) ? (A) : (B) )
 // #define SQR(A) ((A) * (A))
+#ifndef MIN
 #define MIN(A, B)           \
   ({                        \
     __typeof__(A) _a = (A); \
     __typeof__(B) _b = (B); \
     _a < _b ? _a : _b;      \
   })
+#endif
+#ifndef MAX
 #define MAX(A, B)           \
   ({                        \
     __typeof__(A) _a = (A); \
     __typeof__(B) _b = (B); \
     _a > _b ? _a : _b;      \
   })
+#endif
 #define SQR(A)              \
   ({                        \
     __typeof__(A) _a = (A); \
