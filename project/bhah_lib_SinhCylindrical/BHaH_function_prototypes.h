@@ -55,6 +55,8 @@ void enforce_detgammabar_equals_detgammahat(const commondata_struct *restrict co
 void enforce_detgammabar_equals_detgammahat__rfm__SinhCylindrical(const commondata_struct *restrict commondata, const params_struct *restrict params,
                                                                   const rfm_struct *restrict rfmstruct, REAL *restrict in_gfs);
 void initial_data(commondata_struct *restrict commondata, griddata_struct *restrict griddata);
+void manga_radial_initial_data(commondata_struct *restrict commondata, griddata_struct *restrict griddata,
+                               const int num_radial_pts, REAL *restrict r_axis, REAL *restrict rho_baryon, REAL *restrict pressure);
 void initial_data_reader__convert_ADM_Spherical_to_BSSN(
     const commondata_struct *restrict commondata, const params_struct *restrict params, REAL *restrict xx[3], bc_struct *restrict bcstruct,
     MoL_gridfunctions_struct *restrict gridfuncs, ID_persist_struct *restrict ID_persist,
@@ -101,6 +103,8 @@ void Ricci_eval__rfm__SinhCylindrical(const commondata_struct *restrict commonda
                                       const rfm_struct *restrict rfmstruct, const REAL *restrict in_gfs, REAL *restrict auxevol_gfs);
 void TOVola_interp(const commondata_struct *restrict commondata, const params_struct *restrict params, const REAL xCart[3],
                    const ID_persist_struct *restrict ID_persist, initial_data_struct *restrict initial_data);
+void TOVola_radial_only_interp(const commondata_struct *restrict commondata, const params_struct *restrict params, const REAL r_iso,
+                               const ID_persist_struct *restrict ID_persist, REAL *rho_baryon, REAL *pressure);
 void TOVola_solve(const commondata_struct *restrict commondata, ID_persist_struct *ID_persist);
 void write_checkpoint(const commondata_struct *restrict commondata, griddata_struct *restrict griddata);
 void xx_to_Cart(const commondata_struct *restrict commondata, const params_struct *restrict params, REAL *restrict xx[3], const int i0, const int i1,
