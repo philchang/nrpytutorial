@@ -215,9 +215,6 @@ void BHaH_output_file(char *filename, BHaH_struct *bhahstruct, int dim) {
               NGHOSTS, Nxx_plus_2NGHOSTS1 - NGHOSTS,
               NGHOSTS, Nxx_plus_2NGHOSTS2 - NGHOSTS) {
     const int idx = IDX3(i0, i1, i2);
-    REAL xx0 = xx[0][i0];
-    REAL xx1 = xx[1][i1];
-    REAL xx2 = xx[2][i2];
     REAL xCart[3];
     xx_to_Cart(commondata, params, xx, i0, i1, i2, xCart);
     if (dim == 2) {
@@ -252,11 +249,7 @@ int BHaH_get_gridpoints(int *indices, REAL *xCartGrid, REAL xCartMax[3], BHaH_st
 
   int nCartGrid = 0;
   LOOP_REGION(0, Nxx_plus_2NGHOSTS0, 0, Nxx_plus_2NGHOSTS1, 0, Nxx_plus_2NGHOSTS2) {
-
     const int idx = IDX3(i0, i1, i2);
-    const REAL xx0 = xx[0][i0];
-    const REAL xx1 = xx[1][i1];
-    const REAL xx2 = xx[2][i2];
     REAL xCart[3];
     xx_to_Cart(commondata, params, xx, i0, i1, i2, xCart);
 
