@@ -26,22 +26,22 @@
 // #define MIN(A, B) ( ((A) < (B)) ? (A) : (B) )
 // #define MAX(A, B) ( ((A) > (B)) ? (A) : (B) )
 // #define SQR(A) ((A) * (A))
-#define MIN(A, B)                                                                                                                                    \
-  ({                                                                                                                                                 \
-    __typeof__(A) _a = (A);                                                                                                                          \
-    __typeof__(B) _b = (B);                                                                                                                          \
-    _a < _b ? _a : _b;                                                                                                                               \
+#define MIN(A, B)           \
+  ({                        \
+    __typeof__(A) _a = (A); \
+    __typeof__(B) _b = (B); \
+    _a < _b ? _a : _b;      \
   })
-#define MAX(A, B)                                                                                                                                    \
-  ({                                                                                                                                                 \
-    __typeof__(A) _a = (A);                                                                                                                          \
-    __typeof__(B) _b = (B);                                                                                                                          \
-    _a > _b ? _a : _b;                                                                                                                               \
+#define MAX(A, B)           \
+  ({                        \
+    __typeof__(A) _a = (A); \
+    __typeof__(B) _b = (B); \
+    _a > _b ? _a : _b;      \
   })
-#define SQR(A)                                                                                                                                       \
-  ({                                                                                                                                                 \
-    __typeof__(A) _a = (A);                                                                                                                          \
-    _a *_a;                                                                                                                                          \
+#define SQR(A)              \
+  ({                        \
+    __typeof__(A) _a = (A); \
+    _a *_a;                 \
   })
 #ifndef MAYBE_UNUSED
 #if __cplusplus >= 201703L
@@ -239,7 +239,7 @@ typedef struct __MoL_gridfunctions_struct__ {
   REAL *restrict diagnostic_output_gfs2;
 } MoL_gridfunctions_struct;
 
-#define LOOP_ALL_GFS_GPS(ii)                                                                                                                         \
+#define LOOP_ALL_GFS_GPS(ii) \
   _Pragma("omp parallel for") for (int(ii) = 0; (ii) < Nxx_plus_2NGHOSTS0 * Nxx_plus_2NGHOSTS1 * Nxx_plus_2NGHOSTS2 * NUM_EVOL_GFS; (ii)++)
 
 //********************************************
@@ -313,26 +313,26 @@ static const REAL gridfunctions_wavespeed[NUM_EVOL_GFS] = {
 #define IDX4(gf, i, j, k) ((i) + Nxx_plus_2NGHOSTS0 * ((j) + Nxx_plus_2NGHOSTS1 * ((k) + Nxx_plus_2NGHOSTS2 * (gf))))
 #define IDX4pt(gf, idx) ((idx) + (Nxx_plus_2NGHOSTS0 * Nxx_plus_2NGHOSTS1 * Nxx_plus_2NGHOSTS2) * (gf))
 #define IDX3(i, j, k) ((i) + Nxx_plus_2NGHOSTS0 * ((j) + Nxx_plus_2NGHOSTS1 * ((k))))
-#define LOOP_REGION(i0min, i0max, i1min, i1max, i2min, i2max)                                                                                        \
-  for (int i2 = i2min; i2 < i2max; i2++)                                                                                                             \
-    for (int i1 = i1min; i1 < i1max; i1++)                                                                                                           \
+#define LOOP_REGION(i0min, i0max, i1min, i1max, i2min, i2max) \
+  for (int i2 = i2min; i2 < i2max; i2++)                      \
+    for (int i1 = i1min; i1 < i1max; i1++)                    \
       for (int i0 = i0min; i0 < i0max; i0++)
-#define LOOP_OMP(__OMP_PRAGMA__, i0, i0min, i0max, i1, i1min, i1max, i2, i2min, i2max)                                                               \
-  _Pragma(__OMP_PRAGMA__) for (int(i2) = (i2min); (i2) < (i2max); (i2)++) for (int(i1) = (i1min); (i1) < (i1max);                                    \
+#define LOOP_OMP(__OMP_PRAGMA__, i0, i0min, i0max, i1, i1min, i1max, i2, i2min, i2max)                            \
+  _Pragma(__OMP_PRAGMA__) for (int(i2) = (i2min); (i2) < (i2max); (i2)++) for (int(i1) = (i1min); (i1) < (i1max); \
                                                                                (i1)++) for (int(i0) = (i0min); (i0) < (i0max); (i0)++)
-#define LOOP_NOOMP(i0, i0min, i0max, i1, i1min, i1max, i2, i2min, i2max)                                                                             \
-  for (int(i2) = (i2min); (i2) < (i2max); (i2)++)                                                                                                    \
-    for (int(i1) = (i1min); (i1) < (i1max); (i1)++)                                                                                                  \
+#define LOOP_NOOMP(i0, i0min, i0max, i1, i1min, i1max, i2, i2min, i2max) \
+  for (int(i2) = (i2min); (i2) < (i2max); (i2)++)                        \
+    for (int(i1) = (i1min); (i1) < (i1max); (i1)++)                      \
       for (int(i0) = (i0min); (i0) < (i0max); (i0)++)
-#define LOOP_BREAKOUT(i0, i1, i2, i0max, i1max, i2max)                                                                                               \
-  {                                                                                                                                                  \
-    i0 = (i0max);                                                                                                                                    \
-    i1 = (i1max);                                                                                                                                    \
-    i2 = (i2max);                                                                                                                                    \
-    break;                                                                                                                                           \
+#define LOOP_BREAKOUT(i0, i1, i2, i0max, i1max, i2max) \
+  {                                                    \
+    i0 = (i0max);                                      \
+    i1 = (i1max);                                      \
+    i2 = (i2max);                                      \
+    break;                                             \
   }
-#define IS_IN_GRID_INTERIOR(i0i1i2, Nxx_plus_2NGHOSTS0, Nxx_plus_2NGHOSTS1, Nxx_plus_2NGHOSTS2, NG)                                                  \
-  (i0i1i2[0] >= (NG) && i0i1i2[0] < (Nxx_plus_2NGHOSTS0) - (NG) && i0i1i2[1] >= (NG) && i0i1i2[1] < (Nxx_plus_2NGHOSTS1) - (NG) &&                   \
+#define IS_IN_GRID_INTERIOR(i0i1i2, Nxx_plus_2NGHOSTS0, Nxx_plus_2NGHOSTS1, Nxx_plus_2NGHOSTS2, NG)                                \
+  (i0i1i2[0] >= (NG) && i0i1i2[0] < (Nxx_plus_2NGHOSTS0) - (NG) && i0i1i2[1] >= (NG) && i0i1i2[1] < (Nxx_plus_2NGHOSTS1) - (NG) && \
    i0i1i2[2] >= (NG) && i0i1i2[2] < (Nxx_plus_2NGHOSTS2) - (NG))
 
 typedef struct __griddata__ {
