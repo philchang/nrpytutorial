@@ -319,7 +319,7 @@ void BHaH_set_Tmunu_gridpoints(const int nCartGrid, int *indices, REAL *TmunuGri
 
     // Compute components of Tmunu in spherical coordinates
     REAL T4UU00, T4UU01, T4UU02, T4UU03, T4UU11, T4UU12, T4UU13, T4UU22, T4UU23, T4UU33;
-#include "transform_T4UU_from_Cart_to_spherical.h"
+#include "transform_T4UU_from_Cart_to_SinhCylindrical.h"
 
     auxevol_gfs[IDX4(T4UU00GF, i0, i1, i2)] = T4UU00;
     auxevol_gfs[IDX4(T4UU01GF, i0, i1, i2)] = T4UU01;
