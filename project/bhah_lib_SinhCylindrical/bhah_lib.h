@@ -5,8 +5,9 @@ extern "C" {
 #include "BHaH_defines.h"
 #include "BHaH_function_prototypes.h"
 
-void BHaH_setup(const int nxx0, const int nxx1, const int nxx2,
-                const REAL cfl, const REAL rmax, BHaH_struct *bhahstruct);
+void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl,
+                const REAL rmax, const REAL sinhwrho, const REAL sinhwz,
+                BHaH_struct *bhahstruct);
 // void BHaH_initialize(BHaH_struct *bhahstruct);
 // double BHaH_get_timestep(BHaH_struct *bhahstruct); // this one should be deprecated
 // void BHaH_advance_timestep(const REAL t_final, BHaH_struct *bhahstruct);

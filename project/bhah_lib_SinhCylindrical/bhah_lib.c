@@ -38,7 +38,8 @@
  **/
 
 void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl,
-                const REAL rmax, BHaH_struct *bhahstruct) {
+                const REAL rmax, const REAL sinhwrho, const REAL sinhwz,
+                BHaH_struct *bhahstruct) {
 
   // Step 1.a: Allocate memory for the commondata struct
   commondata_struct *commondata = (commondata_struct *)malloc(sizeof(commondata_struct));
@@ -62,9 +63,9 @@ void BHaH_setup(const int nxx0, const int nxx1, const int nxx2, const REAL cfl,
   (griddata[grid].params).AMPLZ = rmax;
   (griddata[grid].params).grid_physical_size = rmax;
 
-  // Thiago says: Overwrite SINH* parameters (evenly spaced grids for now)
-  (griddata[grid].params).SINHWRHO = 1.0;
-  (griddata[grid].params).SINHWZ = 1.0;
+  // Thiago says: Overwrite SINH* parameters (to be set by MaNGa)
+  (griddata[grid].params).SINHWRHO = sinhwrho;
+  (griddata[grid].params).SINHWZ = sinhwz;
 
   // Thiago says: Overwrite Nxx0, Nxx1, and Nxx2 for the single grid
   (griddata[grid].params).Nxx0 = nxx0;
