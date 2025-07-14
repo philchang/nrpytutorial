@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "nrpy+unrescale+basis_transform_to_cartesian_metric.h": "c",
+        "transform_t4uu_from_cart_to_sinhcylindrical.h": "c",
+        "set_codeparameters.h": "c",
+        "uniform_lagrange_interp_3d.h": "c"
+    }
+}
