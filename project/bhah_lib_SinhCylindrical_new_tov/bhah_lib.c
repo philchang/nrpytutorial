@@ -406,62 +406,90 @@ void BHaH_set_PrimsAndPos_particles(int nParticles, const double *prims_and_pos,
 
 #include "set_CodeParameters.h"
 
-  // TODO: loop through particles once to identify hydro grid bounds
+  // Loop through particles once to identify hydro grid bounds and atmosphere values
+  REAL MAXHYDROSIZE = -1.0;
+  REAL rho_min = 1.0e100;
+  REAL ie_min  = 1.0e100;
+  for (int p = 0; p < nParticles; p++) {
+    int offset = p * BHAH_DATA_COMPONENTS;
+    const REAL _rho = prims_and_pos[offset + 0];
+    const REAL _ie = prims_and_pos[offset + 4];
+    const REAL xHydro = prims_and_pos[offset + 5];
+    // Since hydro grid is a square box centered at the origin, we only need to check one dimension
+    if (xHydro > MAXHYDROSIZE)
+      MAXHYDROSIZE = xHydro;
+    if (_rho < rho_min)
+      rho_min = _rho;
+    if (_ie < ie_min)
+      ie_min = _ie;
+  }  // END for (int p = 0; p < nParticles; p++)
 
-  // Populate Tmunu
+  // Adjust hydro size to 95%
+  MAXHYDROSIZE = 0.95 * MAXHYDROSIZE;
+
+  // BHaH loop to populate Tmunu
   LOOP_OMP("omp parallel for",
           i0, NGHOSTS, Nxx_plus_2NGHOSTS0 - NGHOSTS,
           i1, NGHOSTS, Nxx_plus_2NGHOSTS1 - NGHOSTS,
           i2, NGHOSTS, Nxx_plus_2NGHOSTS2 - NGHOSTS) {
 
-    // Compute Cartesian coordinate of the grid point
-    REAL xCart[3] = {0.0, 0.0, 0.0};
-    xx_to_Cart(commondata, params, xx, i0, i1, i2, xCart);
+    // Set curvilinear coordinates
     const REAL xx0 = xx[0][i0];
     const REAL xx1 = xx[1][i1];
     const REAL xx2 = xx[2][i2];
 
-    // Declare variables for hydro particles (poison data for debugging)
+    // Compute Cartesian coordinate of the grid point
+    REAL xCart[3] = {0.0, 0.0, 0.0};
+    xx_to_Cart(commondata, params, xx, i0, i1, i2, xCart);
+
+    // Declare variables for hydro particles (initialize to NANs to catch any errors)
     REAL rho = NAN;
     REAL vx = NAN;
     REAL vy = NAN;
     REAL vz = NAN;
     REAL ie = NAN;
-    REAL xHydro = NAN;
-    REAL yHydro = NAN;
-    REAL zHydro = NAN;
 
-    // Initialize distance square to a very high value
-    REAL dist2 = 1.0e300;
+    // Set primitive values to atmosphere if outside hydro grid
+    if ((fabs(xCart[0]) > MAXHYDROSIZE) || (fabs(xCart[1]) > MAXHYDROSIZE) || (fabs(xCart[2]) > MAXHYDROSIZE)) {
+      rho = rho_min;
+      vx = 0.0;
+      vy = 0.0;
+      vz = 0.0;
+      ie = ie_min;
+    }
+    else {
+      // Initialize distance square to a very high value
+      REAL dist2 = 1.0e300;
 
-    // Loop all particles to perform a nearest neighbor search
-    for (int p = 0; p < nParticles; p++) {
-      int offset = p * BHAH_DATA_COMPONENTS;
-      const REAL _rho = prims_and_pos[offset + 0];
-      const REAL _vx = prims_and_pos[offset + 1];
-      const REAL _vy = prims_and_pos[offset + 2];
-      const REAL _vz = prims_and_pos[offset + 3];
-      const REAL _ie = prims_and_pos[offset + 4];
-      xHydro = prims_and_pos[offset + 5];
-      yHydro = prims_and_pos[offset + 6];
-      zHydro = prims_and_pos[offset + 7];
+      // Loop all particles to perform a nearest neighbor search
+      for (int p = 0; p < nParticles; p++) {
+        int offset = p * BHAH_DATA_COMPONENTS;
+        const REAL _rho = prims_and_pos[offset + 0];
+        const REAL _vx = prims_and_pos[offset + 1];
+        const REAL _vy = prims_and_pos[offset + 2];
+        const REAL _vz = prims_and_pos[offset + 3];
+        const REAL _ie = prims_and_pos[offset + 4];
+        const REAL xHydro = prims_and_pos[offset + 5];
+        const REAL yHydro = prims_and_pos[offset + 6];
+        const REAL zHydro = prims_and_pos[offset + 7];
 
-      const REAL d2 = (
-        (xCart[0] - xHydro) * (xCart[0] - xHydro) +
-        (xCart[1] - yHydro) * (xCart[1] - yHydro) +
-        (xCart[2] - zHydro) * (xCart[2] - zHydro)
-      );
+        const REAL d2 = (
+          (xCart[0] - xHydro) * (xCart[0] - xHydro) +
+          (xCart[1] - yHydro) * (xCart[1] - yHydro) +
+          (xCart[2] - zHydro) * (xCart[2] - zHydro)
+        );
 
-      // Assign primitive variables to the values of the nearest hydro particle
-      if (d2 < dist2) {
-        dist2 = d2;
-        rho = _rho;
-        vx = _vx;
-        vy = _vy;
-        vz = _vz;
-        ie = _ie;
-      }  // END if (d2 < dist2)
-    }  // END for (int p = 0; p < nParticles; p++)
+        // Assign primitive variables to the values of the nearest hydro particle
+        if (d2 < dist2) {
+          dist2 = d2;
+          rho = _rho;
+          vx = _vx;
+          vy = _vy;
+          vz = _vz;
+          ie = _ie;
+        }  // END if (d2 < dist2)
+      }  // END for (int p = 0; p < nParticles; p++)
+    }  // END else
 
     // Compute corresponding pressure
     const REAL press = (commondata->poly_eos_Gamma - 1.0) * rho * ie;
