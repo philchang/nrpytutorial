@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "nrpy+unrescale+basis_transform_to_cartesian_metric.h": "c",
+        "transform_t4uu_from_cart_to_sinhcylindrical.h": "c",
+        "set_codeparameters.h": "c",
+        "uniform_lagrange_interp_3d.h": "c",
+        "gsl_errno.h": "c",
+        "bhah_defines.h": "c",
+        "_for_testing_only_nrpy+gett4uu.h": "c",
+        "bhah_function_prototypes.h": "c"
+    },
+    "C_Cpp.dimInactiveRegions": false
+}
