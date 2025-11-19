@@ -406,3 +406,49 @@ typedef struct BHaH_struct {
   griddata_struct *griddata;
 } BHaH_struct;
 #endif
+
+/* Layout of prims_and_pos for each particle:
+ *   [0] rho
+ *   [1] vx
+ *   [2] vy
+ *   [3] vz
+ *   [4] ie
+ *   [5] x
+ *   [6] y
+ *   [7] z
+ *   [8..] gradients of rho, vx, vy, vz, ie (each 3 components)
+ */
+
+#ifndef BHAH_DATA_RHO
+#define BHAH_DATA_RHO 0
+#define BHAH_DATA_VX 1
+#define BHAH_DATA_VY 2
+#define BHAH_DATA_VZ 3
+#define BHAH_DATA_IE 4
+#define BHAH_DATA_X 5
+#define BHAH_DATA_Y 6
+#define BHAH_DATA_Z 7
+
+/* Gradients d(q)/dx, d(q)/dy, d(q)/dz at particle position */
+#define BHAH_DATA_GRADRHO_X 8
+#define BHAH_DATA_GRADRHO_Y 9
+#define BHAH_DATA_GRADRHO_Z 10
+
+#define BHAH_DATA_GRADVX_X 11
+#define BHAH_DATA_GRADVX_Y 12
+#define BHAH_DATA_GRADVX_Z 13
+
+#define BHAH_DATA_GRADVY_X 14
+#define BHAH_DATA_GRADVY_Y 15
+#define BHAH_DATA_GRADVY_Z 16
+
+#define BHAH_DATA_GRADVZ_X 17
+#define BHAH_DATA_GRADVZ_Y 18
+#define BHAH_DATA_GRADVZ_Z 19
+
+#define BHAH_DATA_GRADIE_X 20
+#define BHAH_DATA_GRADIE_Y 21
+#define BHAH_DATA_GRADIE_Z 22
+
+#define BHAH_DATA_COMPONENTS 23
+#endif
